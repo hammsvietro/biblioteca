@@ -15,9 +15,11 @@ public class Periodico {
     private int codigo;
     private String titulo;
     private String autor;
-    private ArrayList<historicoMovimentacao> historico = new ArrayList();
+    private ArrayList<HistoricoMovimentacao> historico = new ArrayList();
     private int alugaCount;
     private boolean disponivel;
+
+   
     
     public void Periodico(){
         
@@ -28,12 +30,33 @@ public class Periodico {
         this.setCodigo(codigo);
         this.setTitulo(titulo);
         this.disponivel = true;
+        this.alugaCount = 0;
     }
     
-    public void alugar(){
+    public boolean alugar(HistoricoMovimentacao temp){
         this.disponivel = false;
         this.alugaCount++;
+        return this.historico.add(temp);
+    }
+    
+    public void devolver(Date data){
+        this.disponivel = true;
+        if(!this.historico.isEmpty())
+            if(this.historico.size() == 1)
+                this.historico.get(0).setDevolucao(data);
+            else
+                this.historico.get(this.historico.size()-1).setDevolucao(data);
         
+    }
+    
+    public void printHistorico(){
+        if(!historico.isEmpty()){
+            for(HistoricoMovimentacao temp : historico){
+                System.out.println("Usuario: "+temp.getUser().getNome());
+                System.out.println("Data emprestimo: "+temp.getEmprestimo());
+                System.out.println("Data devolucao: "+temp.getDevolucao());
+            }
+        }
     }
     
     public int getAlugaCount(){
@@ -66,13 +89,23 @@ public class Periodico {
         this.autor = autor;
     }
 
-    public ArrayList<historicoMovimentacao> getHistorico() {
+    public ArrayList<HistoricoMovimentacao> getHistorico() {
         return historico;
     }
 
-    public void addHistorico(historicoMovimentacao historico) {
+    public void addHistorico(HistoricoMovimentacao historico) {
         this.historico.add(historico);
     }
+
+    public boolean isDisponivel() {
+        return disponivel;
+    }
+
+    public void setDisponivel(boolean disponivel) {
+        this.disponivel = disponivel;
+    }
+    
+    
     
     
 }

@@ -4,7 +4,9 @@
  * and open the template in the editor.
  */
 package biblioteca;
+import java.text.ParseException;
 import java.util.*;
+import java.text.SimpleDateFormat;
 
 /**
  *
@@ -13,12 +15,12 @@ import java.util.*;
 public class Biblioteca {
 
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         
         int op = 0;
         ArrayList<Usuario> usuarios = new ArrayList();
         ArrayList<Periodico> publicacoes = new ArrayList();
-        ArrayList<historicoMovimentacao>movimentacoes = new ArrayList();
+        ArrayList<HistoricoMovimentacao>movimentacoes = new ArrayList();
         Scanner scan = new Scanner(System.in);
         Scanner scanner = new Scanner(System.in);
         
@@ -164,7 +166,7 @@ public class Biblioteca {
                     System.out.println("2 - ALTERAÇÃO");
                     System.out.println("3 - CONSULTA");
                     System.out.println("4 - EXCLUSÃO");
-                    System.out.println("0 - RETORNAR\n");
+                    System.out.println("0 - RETORNAR");
                     System.out.print("OPÇÃO: ");
                     op1 = scan.nextInt();
 
@@ -250,9 +252,13 @@ public class Biblioteca {
                         for(Periodico temp : publicacoes){
                             System.out.println("Título: "+temp.getTitulo());
                             System.out.println("Autor: "+temp.getAutor());
-                            System.out.println("Código: "+temp.getCodigo()+"\n");
+                            System.out.println("Código: "+temp.getCodigo());
+                            if(temp.isDisponivel())
+                                System.out.println("Disponível para empréstimo!");
+                            else
+                                System.out.println("Indisponível para empréstimo!");
                         }
-                        System.out.println("");
+                        System.out.println("\n");
                     }
                     if(op1 == 4){//EXCLUSAO DE PUBLICACOES
 
@@ -278,7 +284,123 @@ public class Biblioteca {
                 }
             }
             if(op == 3){//MOVIMENTACAO
+                int op1 = 0;
+
+                System.out.println("\nXYZ COMERCIO DE PRODUTOS LTA.");
+                System.out.println("SISTEMA DE CONTROLE DE BIBLIOTECA\n");
+                System.out.println("CONTROLE DE MOVIMENTACAO:\n");
+
+                System.out.println("1 - EMPRÉSTIMO");
+                System.out.println("2 - DEVOLUÇÃO");
+                System.out.println("0 - RETORNAR");
+                System.out.print("OPÇÃO: ");
+                op1 = scan.nextInt();
                 
+                if(op1 == 0) //RETORNAR
+                    break;
+                
+                if(op1 == 1){ //EMPRESTIMO
+                    
+                    System.out.print("\nInsira o código da publicação: ");
+                    
+                    int codigo = scan.nextInt();
+                    boolean found = false;
+                    boolean disponivel = false;
+                    int j = 0;
+                    
+                    for(Periodico temp : publicacoes){
+                        if(codigo == temp.getCodigo()){
+                            found = true;
+                            disponivel = temp.isDisponivel();
+                            break;
+                        }
+                        j++;
+                    }
+                    if(!found){ 
+                        System.out.println("Não existe publicacao com esse codigo");
+                    }
+                    
+                    if(disponivel){//SE PUBLICACAO ESTA DISPONIVEL PARA ALUGAR
+                        
+                        System.out.print("Insira a matrícula do aluno: ");
+                        long matricula = scan.nextLong();
+                        boolean foundUser = false;
+                        int i = 0;
+                        
+                        
+                        for(Usuario temp: usuarios){
+                            if(temp.getMatricula() == matricula){
+                                foundUser = true;
+                                break;
+                            }
+                            i++;
+                        }
+                        if(!foundUser){
+                            System.out.println("Não existe aluno com esta matrícula!");
+                        }else{
+                            System.out.print("Insira a data de empréstimo no formato (dd/mm/yyyy): ");
+                            String emprestimo = scanner.nextLine();
+                            Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(emprestimo);
+                            
+                            HistoricoMovimentacao temp = new HistoricoMovimentacao(usuarios.get(i),date1);
+                            
+                            if(publicacoes.get(j).alugar(temp))
+                                System.out.println("Empréstimo do livro "+publicacoes.get(j).getTitulo() +" feito para "+usuarios.get(i).getNome()+" com sucesso!");
+                            else{
+                                System.out.println("Algo ocorreu de errado, tente novamente");
+                            }
+                            
+                        }
+                        
+                    }else{
+                        System.out.println("Livro não está disponivel!");
+                    }
+                }
+                
+                if(op1 == 2 ){ //DEVOLUCAO
+                    
+                    boolean found = false;
+                    boolean alugado = false;
+                    
+                    System.out.print("Insira o codigo da publicação a ser devolvida: ");
+                    int codigo = scan.nextInt();
+                    int i = 0;
+                    
+                    
+                    for(Periodico temp : publicacoes){
+                        if(codigo == temp.getCodigo()){
+                            found = true;
+                            if(temp.isDisponivel()){
+                                System.out.println("Livro não pode ser devolvido pois não está emprestado");
+                            }else{
+                                alugado = true;
+                            }
+                        }
+                        i++;
+                    }
+                    if(!found){
+                        System.out.println("Nao existe nehnuma publicação com esse código");
+                    }else{ //LIVRO ACHADO
+                        if(alugado){
+                            
+                            System.out.print("Insira a data de devolução no formato (dd/mm/yyyy): ");
+                            String emprestimo = scanner.nextLine();
+                            Date date1 = new SimpleDateFormat("dd/MM/yyyy").parse(emprestimo);
+                            
+                            publicacoes.get(i).devolver(date1);
+                            
+                            System.out.println("Devolução do livro "+publicacoes.get(i).getTitulo()+" realizada com sucesso!");
+                            
+                        }
+                    }
+                    
+                    
+                }
+                if(op1 == 3){
+                    for(Periodico temp : publicacoes){
+                        temp.printHistorico();
+                    }
+                }
             }
             if(op == 4){//RELATORIOS
                 
